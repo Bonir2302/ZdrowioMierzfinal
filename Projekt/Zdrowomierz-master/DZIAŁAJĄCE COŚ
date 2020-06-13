@@ -1,0 +1,147 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <windows.h>
+
+using namespace std;
+
+string wczytajposilek() {
+	string posilek;
+	cout << "Podaj nazwe posilku/produktu: " << endl;
+	getline(cin, posilek);
+	return posilek;
+}
+
+double iloscpobierz(double il) {
+	ifstream f;
+	f.open("Ile.txt");
+	f >> il;
+	f.close();
+	return il;
+}
+
+void ilosczamien(double il) {
+	ofstream f;
+	f.open("Ile.txt");
+	f << il;
+	f.close();
+}
+
+void podsumujkalorie(double il) {
+	il = iloscpobierz(il);
+	ofstream plik;
+	plik.open("Dziennik.txt", ios::app);
+	if (il > 0) {
+		plik << endl << "Ilosc kalorii spozytych tego dnia wynosi " << il << endl << endl;
+		plik << "********** ";
+		SYSTEMTIME st;
+		GetSystemTime(&st);
+		plik << st.wDay;
+		switch (st.wMonth)
+		{
+		case 1: plik << " styczen "; break;
+		case 2: plik << " luty "; break;
+		case 3: plik << " marzec "; break;
+		case 4: plik << " kwiecien "; break;
+		case 5: plik << " maj "; break;
+		case 6: plik << " czerwiec "; break;
+		case 7: plik << " lipiec "; break;
+		case 8: plik << " sierpien "; break;
+		case 9: plik << " wrzesien "; break;
+		case 10: plik << " pazdziernik "; break;
+		case 11: plik << " listopad "; break;
+		case 12: plik << " grudzien "; break;
+		}
+		plik << st.wYear << " **********" << endl << endl;
+
+
+	}
+	ilosczamien(0);
+
+	//plik << DZISIEJSZA DATA
+
+	plik.close();
+}
+
+void czynowydzien(double il) {
+	char k;
+	cout << "Czy to twoj pierwszy posilek dzisiaj? Tak-T, Nie-N  ";
+	cin >> k;
+	if (k != 'T' && k != 'N' && k != 't' && k != 'n') {
+		do {
+			cout << "Nie ma takiej opcji. Wpisz T jesli to twoj pierwszy posilek. W  przeciwnym wypadku wpisz N. " << endl;
+			cin >> k;
+
+		} while (k != 'T' && k != 'N' && k != 't' && k != 'n');
+	}
+
+	switch (k)
+	{
+	case 'T': case 't':
+		podsumujkalorie(il);
+		break;
+	case 'N': case 'n':
+		break;
+	}
+
+}
+
+double wczytajkalorie(double il) {
+	double kcal{}, waga{};
+
+	czynowydzien(il);
+
+	cout << endl << "Podaj ilosc kalorii w 100g produktu : " << endl;
+	HANDLE kolor = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(kolor, FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_INTENSITY);
+	cout << "(Jesli nie wiesz ile wynosi jego kalorycznosc, ";
+	cout << "mozesz znalezc informacje na przyklad na stronie: http://www.ilewazy.pl)" << endl;
+	SetConsoleTextAttribute(kolor, 7);
+
+	cin >> kcal;
+	while (kcal <= 0)
+	{
+		cout << "Podana wartosc jest nieprawidlowa, wpisz ja jeszcze raz!" << endl;
+		cout << "Podaj ilość kalorii w 100g produktu : ";
+		cin >> kcal;
+	}
+	cout << endl << "Podaj wage posilku (wyrazona w gramach): " << endl;
+	cin >> waga;
+	while (waga <= 0)
+	{
+		cout << "Podana wartosc jest nieprawidlowa, wpisz ja jeszcze raz!" << endl;
+		cout << "Podaj wage posilku (wyrazona w gramach): ";
+		cin >> waga;
+	}
+
+	kcal = (kcal * waga) / 100;
+	cout << endl << "Ilosc kalorii w podanej porcji: " << kcal << endl;
+	il = iloscpobierz(il) + kcal;
+	ilosczamien(il);
+	return kcal;
+}
+
+void wpiszdopliku(string posilek, double kcal) {
+	ofstream plik;
+	plik.open("Dziennik.txt", ios::app);
+	plik << posilek << " " << kcal << endl;
+	plik.close();
+}
+
+
+
+int main() {
+	string posilek;
+	double kcal;
+	double il{};
+
+	posilek = wczytajposilek();
+	kcal = wczytajkalorie(il);
+
+	wpiszdopliku(posilek, kcal);
+
+
+	system("pause");
+	return 0;
+}
+
